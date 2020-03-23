@@ -46,8 +46,8 @@ def ordenar():
     lista = lista.split(',')
     for i in range(len(lista)):
         try:
-            lista[i]=int(lista[i])
+            lista[i] = int(lista[i])
         except ValueError:
-            return '404 bad_request'    
+            return '404 bad_request'
     lista = str(quicksort(lista))
     return lista
