@@ -1,20 +1,18 @@
 '''rotas do site e api '''
+from sqlalchemy.orm import sessionmaker
+from models.user import User , session
 from json import loads
 from jinja2 import Environment, PackageLoader, select_autoescape
-from bottle import default_app, route, static_file, request
+from bottle import route, static_file, request, run 
 import core
 from requests import get
-ENV = Environment(
-    loader=PackageLoader('mysite', 'views'),
-    autoescape=select_autoescape(['html', 'xml'])
-)
 
 
 @route('/')
 def hello_world():
     ''' rota da pagina inicial '''
-    return static_file('index.html', root='mysite/views')
-
+#    return static_file('index.html', root='mysite/views')
+    return  'alooo'
 
 @route('/singin')
 def singin():
@@ -28,7 +26,9 @@ def cadastro():
     user = {'name':request.forms.get('name'),
             'password' : request.forms.get('password'),
             'n_de_serie': request.forms.get('n_de_serie')}
-    core.insert_user(user)
+    user = User(nome=user['name'],senha=user['password'],n_de_serie=user['n_de_serie'])
+    session.add(user)
+    session.commit()
     return static_file('cadastro.html', root='mysite/views')
 
 @route('/result', method='POST')
@@ -36,7 +36,8 @@ def do_login():
     '''link do botao de login'''
     username = request.forms.get('val1')
     password = request.forms.get('val2')
-    x = core.autenticate(username, password)
+    user1 = session.query(User).filter(User.nome == username)
+    x = user1.autenticate(password)
     n = core.get_serial(password)
 #    print(n)
     template = ENV.get_template('painel.html')
@@ -126,4 +127,4 @@ def debug():
     template = ENV.get_template('debug.html')
     return template.render(horarios=Horarios)
 
-APPLICATION = default_app()
+run(host='localhost',port=8080, debug=True)
